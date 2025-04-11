@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jafet Clicker</title>
+  <style>
+    /* Retro style settings */
+    body {
+      font-family: "Press Start 2P", sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    #game-container {
+      margin: 30px auto;
+      padding: 20px;
+      max-width: 400px;
+    }
+    #selfie {
+      width: 250px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    #selfie:active {
+      transform: scale(0.95);
+    }
+    #currency-display {
+      font-size: 28px;
+      margin: 20px;
+    }
+    #store {
+      margin: 30px auto;
+      width: 90%;
+      max-width: 600px;
+      text-align: left;
+    }
+    #store h2 {
+      text-align: center;
+    }
+    .building {
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      background: #fff;
+      margin: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .building:hover {
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jafet Clicker</h1>
+  <div id="game-container">
+    <!-- Clickable image: default displays your normal selfie -->
+    <img id="selfie" src="normalJafet.png" alt="Normal Jafet" />
+    <div id="currency-display">J Dollars: 0</div>
+  </div>
+
+  <!-- Production Buildings Store -->
+  <div id="store">
+    <h2>Production Buildings</h2>
+    <div id="buildings-container">
+      <!-- Production building items will be created dynamically -->
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------
+    // Global Game Variables
+    // -------------------------------
+    let jDollars = 0;
+    const clickValue = 1; // Each manual click adds 1 J Dollar
+    
+    // Image sources
+    const normalImageSrc = "normalJafet.png";
+    const hitImageSrc = "hitExpressionJafet.png";
+    
+    // Production Buildings:
+    // Two initial buildings plus 16 additional jdollar production buildings
+    const productionBuildings = [
+      {
+        id: "autoClicker",
+        name: "Auto Clicker",
+        baseCost: 25,
+        cost: 25,
+        count: 0,
+        jps: 1,
+        costMultiplier: 1.15
+      },
+      {
+        id: "selfieFactory",
+        name: "Selfie Factory",
+        baseCost: 100,
+        cost: 100,
+        count: 0,
+        jps: 5,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDminer",
+        name: "J Dollar Miner",
+        baseCost: 500,
+        cost: 500,
+        count: 0,
+        jps: 10,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDprinter",
+        name: "J Dollar Printer",
+        baseCost: 1500,
+        cost: 1500,
+        count: 0,
+        jps: 20,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDbank",
+        name: "J Dollar Bank",
+        baseCost: 5000,
+        cost: 5000,
+        count: 0,
+        jps: 50,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDfactory",
+        name: "J Dollar Factory",
+        baseCost: 20000,
+        cost: 20000,
+        count: 0,
+        jps: 100,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDfarm",
+        name: "J Dollar Farm",
+        baseCost: 100000,
+        cost: 100000,
+        count: 0,
+        jps: 300,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDlab",
+        name: "J Dollar Lab",
+        baseCost: 500000,
+        cost: 500000,
+        count: 0,
+        jps: 1000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDincubator",
+        name: "J Dollar Incubator",
+        baseCost: 2000000,
+        cost: 2000000,
+        count: 0,
+        jps: 3000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDrobot",
+        name: "J Dollar Robot",
+        baseCost: 10000000,
+        cost: 10000000,
+        count: 0,
+        jps: 10000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDmarket",
+        name: "J Dollar Market",
+        baseCost: 50000000,
+        cost: 50000000,
+        count: 0,
+        jps: 25000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDtower",
+        name: "J Dollar Tower",
+        baseCost: 200000000,
+        cost: 200000000,
+        count: 0,
+        jps: 50000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDmansion",
+        name: "J Dollar Mansion",
+        baseCost: 1000000000,
+        cost: 1000000000,
+        count: 0,
+        jps: 100000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDresort",
+        name: "J Dollar Resort",
+        baseCost: 5000000000,
+        cost: 5000000000,
+        count: 0,
+        jps: 250000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDstadium",
+        name: "J Dollar Stadium",
+        baseCost: 20000000000,
+        cost: 20000000000,
+        count: 0,
+        jps: 500000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDemperior",
+        name: "J Dollar Empire",
+        baseCost: 100000000000,
+        cost: 100000000000,
+        count: 0,
+        jps: 1000000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDhq",
+        name: "J Dollar Headquarters",
+        baseCost: 500000000000,
+        cost: 500000000000,
+        count: 0,
+        jps: 2500000,
+        costMultiplier: 1.15
+      },
+      {
+        id: "jDuniverse",
+        name: "J Dollar Universe",
+        baseCost: 2500000000000,
+        cost: 2500000000000,
+        count: 0,
+        jps: 5000000,
+        costMultiplier: 1.15
+      }
+    ];
+    
+    // -------------------------------
+    // DOM References
+    // -------------------------------
+    const selfie = document.getElementById("selfie");
+    const currencyDisplay = document.getElementById("currency-display");
+    const buildingsContainer = document.getElementById("buildings-container");
+    
+    // -------------------------------
+    // Local Storage Save & Load Functions
+    // -------------------------------
+    function saveGameState() {
+      const gameState = {
+        jDollars: jDollars,
+        productionBuildings: productionBuildings.map(building => ({
+          id: building.id,
+          count: building.count,
+          cost: building.cost
+        }))
+      };
+      localStorage.setItem('jafetClickerState', JSON.stringify(gameState));
+    }
+    
+    function loadGameState() {
+      const savedState = localStorage.getItem('jafetClickerState');
+      if (savedState) {
+        try {
+          const gameState = JSON.parse(savedState);
+          if (gameState.jDollars !== undefined) {
+            jDollars = gameState.jDollars;
+          }
+          if (gameState.productionBuildings) {
+            gameState.productionBuildings.forEach(savedBuilding => {
+              const building = productionBuildings.find(b => b.id === savedBuilding.id);
+              if (building) {
+                building.count = savedBuilding.count;
+                building.cost = savedBuilding.cost;
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error loading saved state:", error);
+        }
+      }
+    }
+    
+    // -------------------------------
+    // Update Display Function
+    // -------------------------------
+    function updateDisplay() {
+      // Update the currency counter (displaying whole numbers)
+      currencyDisplay.textContent = `J Dollars: ${Math.floor(jDollars)}`;
+      
+      // Refresh the store display with the latest info for each building
+      buildingsContainer.innerHTML = "";
+      productionBuildings.forEach(building => {
+        const buildingDiv = document.createElement("div");
+        buildingDiv.classList.add("building");
+        buildingDiv.innerHTML = `
+          <strong>${building.name}</strong><br>
+          Owned: ${building.count}<br>
+          Cost: ${Math.floor(building.cost)} J Dollars<br>
+          Produces: ${building.jps} J Dollar(s)/sec each
+        `;
+        // Purchasing the building on click
+        buildingDiv.addEventListener("click", () => purchaseBuilding(building.id));
+        buildingsContainer.appendChild(buildingDiv);
+      });
+      
+      // Save the game state after every display update
+      saveGameState();
+    }
+    
+    // -------------------------------
+    // Manual Click Handler
+    // -------------------------------
+    selfie.addEventListener("click", () => {
+      // Add J Dollars for clicking
+      jDollars += clickValue;
+      // Temporary swap to "hit" expression then revert after 200ms
+      selfie.src = hitImageSrc;
+      setTimeout(() => {
+        selfie.src = normalImageSrc;
+      }, 200);
+      updateDisplay();
+    });
+    
+    // -------------------------------
+    // Purchase Building Function
+    // -------------------------------
+    function purchaseBuilding(id) {
+      const building = productionBuildings.find(b => b.id === id);
+      if (jDollars >= building.cost) {
+        jDollars -= building.cost;
+        building.count++;
+        // Increase cost using an exponential multiplier for balanced scaling
+        building.cost = building.baseCost * Math.pow(building.costMultiplier, building.count);
+        updateDisplay();
+      }
+    }
+    
+    // -------------------------------
+    // Production Loop: Generate J Dollars per second
+    // -------------------------------
+    setInterval(() => {
+      let totalProduction = 0;
+      productionBuildings.forEach(building => {
+        totalProduction += building.count * building.jps;
+      });
+      jDollars += totalProduction;
+      updateDisplay();
+    }, 1000);
+    
+    // -------------------------------
+    // On Load: Attempt to load previous game state, then update display
+    // -------------------------------
+    loadGameState();
+    updateDisplay();
+  </script>
+</body>
+</html>
